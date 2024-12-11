@@ -1,0 +1,296 @@
+---
+title: "Penguin Assignment"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## QUESTION 01: Data Visualisation for Science Communication
+
+*Create a figure using the Palmer Penguin dataset that is correct but badly communicates the data. **Do not make a boxplot**.*
+
+### a) Provide your figure here:
+
+```{r bad figure code, echo=FALSE, warning=FALSE}
+library(ggplot2)
+library(palmerpenguins)
+
+#making a histogram of flipper length by species
+ggplot(penguins, aes(x = flipper_length_mm, fill = species)) +
+  geom_histogram(binwidth = 5, color = "black") +
+  labs(
+    title = "Histogram Showing Flipper Length of Penguin Species", 
+    x = "Flipper Length (mm)", 
+    y = "Count", 
+    fill = "Species"
+  ) +
+  theme_classic()
+
+```
+
+### b) Write about how your design choices mislead the reader about the underlying data (200-300 words).
+
+There are a range of design choices that make it hard to interpret the data correctly in this histogram. Although inferences can be made about general trends in flipper lengths, it would be easy to misinterpret this figure because of its layout. Firstly, the categories are all merged together, so it is hard to separate the trends between the different species. The stacked bars are not appropriate because it is confusing to the reader as it is difficult to interpret what the frequency is for the different species, and it is hard to make comparisons as it does not clearly visualize individual patterns. A side-by-side layout, or transparent bars, would make it easier to interpret the distribution of the data and make easy comparisons. Also, the use of the default colours is a poor design choice because if the reader is red-green colour-blind, they will not be able to distinguish between the Adelie and Chinstrap species, as the stacked bars would appear the same colour. This can be improved by using a colour scheme designed for accessibility (Rocchini *et al.,* 2024). Furthermore, using the ggplot2 "classic" theme removes the gridlines and background shading on the graph, making it harder to interpret given its complexity (Franzblau & Chung, 2012). Another issue is that the bin length is quite large and therefore could be hiding some important underlying trends in the data. Overall, the design choices on this histogram combine to make the visualization of the raw data less effective and mislead the reader about trends in the data.
+
+#### References
+
+Franzblau, L. E., & Chung, K. C. (2012). Graphs, tables, and figures in scientific publications: the good, the bad, and how not to be the latter. *The Journal of hand surgery*, *37*(3), 591-596.
+
+Rocchini, D., Chieffallo, L., Thouverai, E., D'Introno, R., Dagostin, F., Donini, E., ... & Nowosad, J. (2024). Under the mantra:‘Make use of colorblind friendly graphs’. *Environmetrics*, *35*(6), e2877.
+
+#### Data:
+
+Gorman KB, Williams TD, Fraser WR (2014). Ecological sexual dimorphism and environmental variability within a community of Antarctic penguins (genus *Pygoscelis*). PLoS ONE 9(3):e90081.
+
+------------------------------------------------------------------------
+
+## QUESTION 2: Data Pipeline
+
+*Write a data analysis pipeline in your .rmd RMarkdown file. You should be aiming to write a clear explanation of the steps, the figures visible, as well as clear code.*
+
+*An exploratory figure shows raw data, such as the distribution of the data. A results figure demonstrates the stats method chosen, and includes the results of the stats test.*
+
+*You will be marked on the following:*
+
+#### a) Your code for readability and functionality
+
+#### b) Your figures for communication
+
+#### c) Your text communication of your analysis
+
+*Below is a template you can use.*
+
+------------------------------------------------------------------------
+
+### Introduction
+
+The Palmer Penguins dataset contains information on a range of characteristics of three species of penguin. It has information on characteristics such as region, island and clutch completion of these penguins, as well as morphological information such as culmen length and depth, body mass, and flipper length. This dataset therefore has a range of discrete and continuous variables that can be used for analysis of these penguins.
+
+```{r Loading Data, message=FALSE, warning=FALSE, results='hide'}
+
+renv::restore()
+
+#Starting off by loading the data
+#Loading libraries
+library(tidyverse)
+library(palmerpenguins)
+library(janitor)
+library(here)
+library(ggplot2)
+library(patchwork)
+library(ragg)
+library(svglite)
+library(car)
+library(emmeans)
+
+#Here to tell you where we are
+#Using the invisible function to hide the output containing my working directory in the html
+invisible(here())
+
+#Looking at the dataset
+head(penguins_raw)
+colnames(penguins_raw)
+summary(penguins_raw)
+#There are issues with white spaces, brackets, capitalization and clutter
+#Writing data to csv using here, this means that the raw data can be loaded again after issues
+write.csv(penguins_raw, here("data", "penguins_raw.csv"))
+
+```
+
+However, the "penguins_raw" data contains issues for analysis because of its layout, for example column names have white spaces, irregular capitalization, brackets and there are NAs in the data; this would cause issues in analysis because it is incompatible with the R language. Below is a set of code using a cleaning function to tidy up the data set, getting it ready for analysis. The clean data is written into a csv file so it is safe, and therefore if any analysis goes wrong, it will be stored separately, meaning the original version will be preserved.
+
+```{r Cleaning Data}
+#using functions from the functions folder to clean the dataset
+source(here("functions", "cleaning.R"))
+penguins_clean <- penguins_raw %>%
+  clean_column_names() %>% #cleaning the coloumn names
+  remove_columns(column_names = "comments") %>% #removing unneeded columns
+  shorten_species() %>% #shorten species names
+  remove_empty_columns_rows() %>% #remove empty columns and rows
+  remove_NA() #remove rows with missing values
+
+#looking to see if this worked
+colnames(penguins_clean)
+#The coloumns have been cleaned successfully 
+#Writing the clean data to a csv using here so it is protected during analysis
+write.csv(penguins_clean, here("data", "penguins_clean.csv"))
+```
+
+Once the data has been cleaned, it is ready for exploration of the data. A flexible function was created so the same style of graph could be easily made using different variables, to explore the range of data on these penguins. As seen in the two figures below, the relationship between body size and flipper length, and body size and culmen length are explored between the different species (Adelie, Chinstrap and Gentoo). There are standardized colours used for each of the penguin species. The graphs both suggest patterns between species and these morphological variables, but further analysis is required to look into this.
+
+```{r Data Exploration}
+
+#Looking at flipper length and body mass distributions using scatter graphs 
+#A function from the plotting.R document is used here
+source(here("functions", "plotting.R"))
+
+species_colours <- c("Adelie" = "darkorange",
+                     "Chinstrap" = "purple",
+                     "Gentoo" = "cyan4")
+
+plot1 <- plot_scatter(penguins_clean, 
+             flipper_length_mm, body_mass_g,
+             "Flipper Length (mm)", "Body Mass (g)",
+             species_colours,
+             caption = "Figure 1.1- A scatter plot of flipper length and body size")
+plot1
+
+plot2 <- plot_scatter(penguins_clean, 
+             culmen_length_mm,body_mass_g,
+             "Culmen Length (mm)", "Body Mass (g)", 
+             species_colours,
+             caption = "Figure 1.2- A scatter plot of culmen length and body size")
+plot2
+
+#Using patchwork to make a combined plot of the two graphs
+combined_plot <- (plot1 | plot2)
+combined_plot
+```
+
+The figures are saved into png and svg files so they are stored safely and can be used in a report. The dimensions can also be easily changed for use in different applications, for example for a poster or a PowerPoint. Saving them as a vector (svg) makes them a much higher resolution, leading to higher quality figures.
+
+```{r Saving Figures}
+
+#saving the figures as pgn files and as vectors for higher resolution
+save.plot1.pgn <- plot1
+agg_png("figures/penguin_scatter_bodyxflipper.png", 
+        width = 20, height = 20, units = "cm", res = 300, scaling = 2)
+print(save.plot1.pgn)
+dev.off()
+
+save.plot1.svg <- plot1
+inches_conversion = 2.54
+svglite("figures/penguin_scatter1_vector.svg", 
+        width = 20 / inches_conversion, 
+        height = 20 / inches_conversion, 
+        scaling = 2)
+print(save.plot1.svg)
+dev.off()
+
+save.plot2.png <- plot2
+agg_png("figures/penguin_scatter_bodyxculmen.png", 
+        width = 20, 
+        height = 20, 
+        units = "cm", 
+        res = 300, 
+        scaling = 2)
+print(save.plot2.png)
+dev.off()
+
+save.plot2.svg <- plot2
+inches_conversion = 2.54
+svglite("figures/penguin_scatter2_vector.svg", 
+        width = 20 / inches_conversion, 
+        height = 20 / inches_conversion, 
+        scaling = 2)
+print(save.plot1.svg)
+dev.off()
+#This has saved the figures into the folder in the project
+```
+
+### Hypothesis
+
+This analysis will focus on the relationship between species and flipper length, accounting for differences in body size, as this is likely to have an impact on flipper length. This can have biological importance because different sized flipper length may be adaptive to the different niches of the penguins. Preregistering hypotheses before conducting an analysis can help increase reproducibility.
+
+The null hypothesis (H0) is that there is no difference in flipper length between different species. The alternative hypothesis (H1) is that there is a significant difference between the three penguin species. It is also expected that body size will also have a significant effect on flipper length, hence it will be accounted for.
+
+### Statistical Methods
+
+An analysis of covariance (ANCOVA) was performed to investigate the differences in flipper length between species, with body mass as a co-variate. This is because body mass is likely to have an impact on flipper length, and therefore accounting for it in the analysis will allow the differences between species to be seen more precisely. A graphical assessment of the normality, linearity and heteroscedasticity suggests that there are minor deviations to the assumptions, but these are only small and not enough to violate the assumptions of the model, as ANCOVA is robust to small deviations, especially given the large sample size. There is a linear relationship between body mass and flipper length, and the slope is similar in all three species, meaning that the assumption of homogeneity of regression lines is met.
+
+```{r Statistics}
+#Using an Ancova model to see whether flipper length is different between the different species, with body size as a covariate 
+ancova_flippers <- aov(flipper_length_mm ~ species + body_mass_g, data = penguins_clean)
+summary(ancova_flippers)
+
+#Checking assumptions of the ancova (linearity, normality, homogeneity of variance)
+plot(ancova_flippers)
+#slight deviation from normality in QQ plot
+penguins_clean$species <- as.factor(penguins_clean$species)#making species into factors so that the levene test doesn't come up with a warning
+leveneTest(flipper_length_mm ~ species, data = penguins_clean)
+#P value of 0.6392 means there is not a significant violation of homoscedasticity 
+#None of the assumptions appear to be severely violated, ANCOVA is robust to a certain level of violations
+
+#pos-hoc analysis using the Tukey-Kramer test
+#this is a good test for this data because it adjusts for unequal sample sizes 
+#using the estimated mariginal means package because the TukeyHSD function does not work with a covariate
+emmeans(ancova_flippers, pairwise ~ species, adjust = "tukey")
+#significant difference between all of the pairs
+```
+
+### Results & Discussion
+
+The results of this statistical analysis suggest that there was a significant effect of both species and body mass on flipper length. This suggests that flipper length differs between species, regardless of body mass, although this does play a role. Species accounted for a large proportion of variance in flipper length and this was highly significant (F=886.05, p\<0.001). Body mass as a co-variate also accounted for a large proportion of variance which was highly significant (F=181.52, p\<0.001). Therefore, the null hypothesis that there is no difference in flipper length between species can be rejected. Post-hoc analysis using the Tukey-Kramer test was performed to look at pairwise comparisons, adjusting for the unequal sample sizes of the different species. It found that there were significant differences in flipper length between all three of the species when compared individually (p\<0.001). It also showed that the species that has the longest flippers was Gentoo, followed by Chinstrap, and Adelie penguins had the shortest flippers. The results of this analysis are visually represented in the figure below: a scatterplot of body mass and flipper length, separated by species, with linear regression lines added on top to show the results. The shaded areas around the regression lines in this figure represent the 95% confidence intervals. The code saves this figure as a .pgn and .svg, as with the exploratory figures. These results suggest that the penguins have different flipper lengths depending on the species, irrespective of body mass. This may have biological significance because this may reflect differences in their adaptations to different niches, for example, larger flippers may be beneficial for faster swimming.
+
+```{r Plotting Results, message=FALSE}
+
+#using the a function from the plotting.R document again
+ source(here("functions", "plotting.R"))
+
+#setting colours for the confidence intervals on the regression lines
+CI_colours <- c("Adelie" = "lightsalmon", 
+                "Chinstrap" = "plum1", 
+                "Gentoo" = "lightblue")
+
+#plotting the results of the ancova onto the scatter graph to show the regression lines for better interpretation of the results 
+#using the function from plotting.R
+ancova.plot <- plot_ancova_results(ancova_flippers, 
+             flipper_length_mm, body_mass_g,
+             "Flipper Length (mm)", "Body Mass (g)", 
+             species_colours,
+             caption = "Figure 2- A scatter plot of ANCOVA results")
+ancova.plot
+
+#saving the plot as a png and then as a svg using the functions in the plotting.R document
+save_plot_png(ancova.plot,
+              here("figures", "ancova.plot.png"),
+              size = 20, res = 300, scaling = 2)
+save_plot_svg(ancova.plot,
+              here("figures", "ancova.plot.svg"),
+              size = 20, scaling = 2)
+
+#creating a renv snapshot for reproducibility
+#renv::snapshot()
+```
+
+### Conclusion
+
+To conclude, this analysis demonstrated that flipper length is significantly affected by species and body mass, and it was significantly different between all three species. Techniques were used to ensure that the results of these analyses were reproducible. Gentoo penguins have the largest flipper lengths, followed by Chinstrap then Adelie. This may have biological significance in functional aspect of flipper length, for example adapting to their niche by affecting swimming speed. Further analysis could look into the relationship between flipper length and ecological niche in these penguins.
+
+------------------------------------------------------------------------
+
+## QUESTION 3: Open Science
+
+### a) GitHub
+
+*Upload your RProject you created for **Question 2** and any files and subfolders used to GitHub. Do not include any identifiers such as your name. Make sure your GitHub repo is public.*
+
+*GitHub link:*
+
+*You will be marked on your repo organisation and readability.*
+
+### b) Share your repo with a partner, download, and try to run their data pipeline.
+
+*Partner's GitHub link:*
+
+*You **must** provide this so I can verify there is no plagiarism between you and your partner.*
+
+### c) Reflect on your experience running their code. (300-500 words)
+
+-   *What elements of your partner's code helped you to understand their data pipeline?*
+
+-   *Did it run? Did you need to fix anything?*
+
+-   *What suggestions would you make for improving their code to make it more understandable or reproducible, and why?*
+
+-   *If you needed to alter your partner's figure using their code, do you think that would be easy or difficult, and why?*
+
+### d) Reflect on your own code based on your experience with your partner's code and their review of yours. (300-500 words)
+
+-   *What improvements did they suggest, and do you agree?*
+
+-   *What did you learn about writing code for other people?*
