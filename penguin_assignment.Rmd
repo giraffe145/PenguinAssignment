@@ -224,6 +224,14 @@ emmeans(ancova_flippers, pairwise ~ species, adjust = "tukey")
 
 ### Results & Discussion
 
+| Pairwise comparisons | Estimated difference in means | Standard error | Degrees of Freedom | t statistic | p value |
+|----|----|----|----|----|----|
+| Adelie and Chinstrap | -5.11 | 0.795 | 320 | -6.429 | \<.0001 |
+| Adelie and Gentoo | -14.90 | 1.120 | 320 | -13.329 | \<.0001 |
+| Chinstrap and Gentoo | -9.79 | 1.200 | 320 | -8.157 | \<.0001 |
+
+: Table of Results from Post-Hoc Analysis
+
 The results of this statistical analysis suggest that there was a significant effect of both species and body mass on flipper length. This suggests that flipper length differs between species, regardless of body mass, although this does play a role. Species accounted for a large proportion of variance in flipper length and this was highly significant (F=886.05, p\<0.001). Body mass as a co-variate also accounted for a large proportion of variance which was highly significant (F=181.52, p\<0.001). Therefore, the null hypothesis that there is no difference in flipper length between species can be rejected. Post-hoc analysis using the Tukey-Kramer test was performed to look at pairwise comparisons, adjusting for the unequal sample sizes of the different species. It found that there were significant differences in flipper length between all three of the species when compared individually (p\<0.001). It also showed that the species that has the longest flippers was Gentoo, followed by Chinstrap, and Adelie penguins had the shortest flippers. The results of this analysis are visually represented in the figure below: a scatterplot of body mass and flipper length, separated by species, with linear regression lines added on top to show the results. The shaded areas around the regression lines in this figure represent the 95% confidence intervals. The code saves this figure as a .pgn and .svg, as with the exploratory figures. These results suggest that the penguins have different flipper lengths depending on the species, irrespective of body mass. This may have biological significance because this may reflect differences in their adaptations to different niches, for example, larger flippers may be beneficial for faster swimming.
 
 ```{r Plotting Results, message=FALSE}
