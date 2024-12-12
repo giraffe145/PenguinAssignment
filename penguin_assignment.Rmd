@@ -74,7 +74,6 @@ The Palmer Penguins dataset contains information on a range of characteristics o
 ```{r Loading Data, message=FALSE, warning=FALSE, results='hide'}
 
 renv::restore()
-
 #Starting off by loading the data
 #Loading libraries
 library(tidyverse)
@@ -209,6 +208,7 @@ ancova_flippers <- aov(flipper_length_mm ~ species + body_mass_g, data = penguin
 summary(ancova_flippers)
 
 #Checking assumptions of the ancova (linearity, normality, homogeneity of variance)
+par(mfrow = c(2, 2))#making it into a multipanel figure
 plot(ancova_flippers)
 #slight deviation from normality in QQ plot
 penguins_clean$species <- as.factor(penguins_clean$species)#making species into factors so that the levene test doesn't come up with a warning
@@ -268,7 +268,7 @@ save_plot_svg(ancova.plot,
 
 ### Conclusion
 
-To conclude, this analysis demonstrated that flipper length is significantly affected by species and body mass, and it was significantly different between all three species. Techniques were used to ensure that the results of these analyses were reproducible. Gentoo penguins have the largest flipper lengths, followed by Chinstrap then Adelie. This may have biological significance in functional aspects of flipper length, for example adapting to their niche by affecting swimming speed. Further analysis could look into the relationship between flipper length and ecological niche in these penguins.
+To conclude, this analysis demonstrated that flipper length is significantly affected by species and body mass, and it was significantly different between all three species. Gentoo penguins have the largest flipper lengths, followed by Chinstrap then Adelie. This may have biological significance in functional aspects of flipper length, for example adapting to their niche by affecting swimming speed. Further analysis could look into the relationship between flipper length and ecological niche in these penguins. Techniques were used to ensure that the results of these analyses were reproducible.
 
 ------------------------------------------------------------------------
 
@@ -313,3 +313,9 @@ This person reviewed my code: <https://github.com/Dinosaur88/Reproducible_resear
 -   *What improvements did they suggest, and do you agree?*
 
 -   *What did you learn about writing code for other people?*
+
+    #### Answer
+
+    One of the improvements that were suggested for my code was removing redundant code, this has taught me to always triple-check the output of my code because I did not intend to keep in multiple copies of some of the figures (as they were only there at first to check the code worked, then I should have taken them out). Another suggestion was to include titles on the figures; I didn’t do this originally because many journal figures do not have titles, but perhaps the figures would be easier to understand with a title. Also, it was unexpected that my partner had to manually download packages because I predicted this would be done by renv, but I have learned that in the future I need to try it out on other people’s laptops so that I can ensure that I have configured renv correctly, as this is really important for reproducibility because a reader would be able to use the exact same packages as me in this process.
+
+    It was really interesting to work through someone else’s code because it brings to light aspects of your own code that you wouldn’t otherwise notice. For example, in the future, I will label the individual steps of a function in more detail because I found this really useful for understanding another person’s code and their logic behind each step. I also think that my code could be improved through making it more concise and making more use of functions to avoid clutter in the final pipeline. Through this exercise, I have realised the importance of understanding in reproducibility, because in order to recreate something, you must first understand it. For example, if I were to make alterations to their graphs, I need to understand every step of their code in order to do this. Furthermore, looking at their code allowed me to make my own inferences about the data that they were exploring, because it provides more information than just their explanations, and you get to see the logic behind the conclusions that have been made. I have also realised how important it is to name things in a way that makes sense to others, so that they can interpret your code, and it is useful break the code down into sections that can be followed logically. It is also really important to be consistent and document each aspect of your code to consider a user without prior knowledge. Finally, I have learned about the importance of sharing code with other people because it helps amplify learning and understanding for both the person reading the code and the person who wrote it.
