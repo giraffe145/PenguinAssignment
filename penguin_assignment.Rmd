@@ -3,6 +3,9 @@ title: "Penguin Assignment"
 output:
   html_document: default
   pdf_document: default
+format:
+    html:
+       embed-resources: true
 ---
 
 ```{r setup, include=FALSE}
@@ -275,13 +278,17 @@ To conclude, this analysis demonstrated that flipper length is significantly aff
 
 *Upload your RProject you created for **Question 2** and any files and subfolders used to GitHub. Do not include any identifiers such as your name. Make sure your GitHub repo is public.*
 
-*GitHub link:*
+*GitHub link:* <https://github.com/giraffe145/PenguinAssignment.git>
 
 *You will be marked on your repo organisation and readability.*
 
 ### b) Share your repo with a partner, download, and try to run their data pipeline.
 
 *Partner's GitHub link:*
+
+I reviewed this person's code: <https://github.com/biologystudentpenguins/reproducible_figures_assessment.git>
+
+This person reviewed my code: <https://github.com/Dinosaur88/Reproducible_research_assignment.git>
 
 *You **must** provide this so I can verify there is no plagiarism between you and your partner.*
 
@@ -294,6 +301,12 @@ To conclude, this analysis demonstrated that flipper length is significantly aff
 -   *What suggestions would you make for improving their code to make it more understandable or reproducible, and why?*
 
 -   *If you needed to alter your partner's figure using their code, do you think that would be easy or difficult, and why?*
+
+    #### Answer:
+
+    Almost every line of code in this person's pipeline is given an explanation, which is helpful because it sets out what the goal of each step of the code is. It is also useful that the code is clearly named, so you can tell what it is (for example “penguins_data_clean” is easy to understand that it is the clean penguin data). The text outside of the data pipeline is also detailed and valuable to understand the logic behind all of the code that is being written. It followed a very rational structure, and I therefore felt like I understood what was happening in every step of the pipeline. Splitting up the code into chunks with R Markdown meant that each part could be run individually, and therefore each section was understandable and cohesive, with explanation in between. The use of functions in a different document kept number of lines of code down to a minimum, making it easier to see what is being done, and the functions are cleanly presented in a folder. A suggestion to make this more understandable is to state within the pipeline when a function is being used and direct the reader to the document containing that function, so it is easier to find (for example when “plot_exploratory_figure” is used, say that it is in the plotting.R document).
+
+    I had to download some packages in order to load the libraries, but because they were all in one place, this was easy to do at the beginning, before running any code. The pipeline ran really well, except for one minor error in line 319 in which “flipper_mass_data” should have been “flipper_mass_data_clean”, and this meant that R didn’t recognise it and didn’t plot the results figure successfully. This, however, was easy to correct because everything had been organised so logically, meaning it was easy to find the intended name. If I needed to alter my partner’s figure, I think that it would be easy because every line of the function is labelled and therefore it is easy to understand what is going on, and therefore you can know exactly what you are altering. An improvement that I would make to the function is perhaps to make it more general, so that you could use same function to produce different figures depending on how you code it. For example, for the exploratory figure, the x and y values are set as flipper length and body mass in the function, whereas this could be generalised so different variables could be used in the pipeline when using this function.
 
 ### d) Reflect on your own code based on your experience with your partner's code and their review of yours. (300-500 words)
 
